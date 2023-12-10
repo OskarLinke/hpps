@@ -45,22 +45,62 @@ int read_uint_ascii(FILE *f, uint32_t *out) {
   }
 }
 
+
 int read_double_ascii(FILE *f, double *out) {
+  // Reads ASCII floats in input stream 
+  // and updates double out value to ASCII input float.
 
-  double result; 
-  uint32_t before_comma;
-  uint32_t after_comma;
-  read_uint_ascii(f, &before_comma);
-  getc(f);
-  read_uint_ascii(f, &after_comma); 
-  printf("before comma: %u \n", before_comma);
-  printf("after comma: %u\n", after_comma);
+  double result = 0.0;  // Initialize result
+  int has_sign = 0;
+
+  // Check for the presence of a sign character '-'
+  int sign_char = fgetc(f);
+
+  if (sign_char == '-') {
+    has_sign = 1;
+  } else {
+    // Unget the character if it's not a '-'
+    ungetc(sign_char, f);
+  }
+
+  // Read the integer part before the '.'
+  uint32_t integer_part;
+  if (read_uint_ascii(f, &integer_part) != 0) {
+      printf("Error reading integer part.\n");
+      return 1;
+    }
+
+  // Remove '.' from filestream
+  if (fgetc(f) != '.') {
+    printf("Expected decimal point, got unexpected character.");
+    return 2;
+  }
+
+  // Read the integer part after the '.'
+  uint32_t decimal_int;
+  if (read_uint_ascii(f, &decimal_int) != 0) {
+    printf("Error reading decimal part.\n");
+    return 3;
+  }
+
+  // Put it all together
+  //double true_decimal = 0.0;
+  double decimal_part = (double)decimal_int;
+  while (decimal_part >= 1.0) { 
+    decimal_part = decimal_part / 10;
+  }
+
+  result += integer_part;
+  result += decimal_part;
+
+  // If there is a sign, negate the whole expression
+  if (has_sign) {
+    result = -result;
+  }
   
-  
+  *out = result;
 
-  return 0;
-
-
+  return 0; // Success
 }
 
 int read_uint_le(FILE *f, uint32_t *out) {
@@ -89,7 +129,7 @@ int read_uint_le(FILE *f, uint32_t *out) {
 }
 
 int read_uint_be(FILE *f, uint32_t *out) {
-    //Similar to read_uint_le, but it adds the bytes to the 
+  //Similar to read_uint_le, but it adds the bytes to the 
   //destination file in the opposite order
   int b0, b1, b2, b3;
   b0 = fgetc(f);
@@ -113,12 +153,13 @@ int read_uint_be(FILE *f, uint32_t *out) {
     | ((uint32_t)b0 << 24);
   return 0;
 }
+
 /*
 int read_double_bin(FILE *f, double *out) {
   //Implemented similarly to read_uint_le, but I think
   //I've just made a longer integer, and the number isn't
   //able to make decimals, which is an issue
-  int b0, b1, b2, b3, b4, b5, b6, b7;
+  double b0, b1, b2, b3, b4, b5, b6, b7;
   b0 = fgetc(f);
 
   if (b0 == EOF) {
@@ -149,6 +190,7 @@ int read_double_bin(FILE *f, double *out) {
   return 0;
 }
 */
+
 int write_uint_ascii(FILE *f, uint32_t x) {
   if (fprintf(f, "%u", x) < 0) {
     return 1;
@@ -179,8 +221,8 @@ int write_uint_le(FILE *f, uint32_t x) {
 int write_uint_be(FILE *f, uint32_t x) {
   //similar to write_uint_le, but it adds the source bytes
   //to the destination in the opposite order
-  fputc(x>>24,  f);
-  fputc(x>>16,  f);
+  fputc(x>>24, f);
+  fputc(x>>16, f);
   fputc(x>>8, f);
   fputc(x>>0, f);
   return 0;
@@ -195,18 +237,10 @@ int write_double_bin(FILE *f, double x) {
   fputc(x>>8,  f);
   fputc(x>>16, f);
   fputc(x>>24, f);
-  fputc(x>>32,  f);
-  fputc(x>>40,  f);
+  fputc(x>>32, f);
+  fputc(x>>40, f);
   fputc(x>>48, f);
   fputc(x>>56, f);
   return 0;
 }
 */
-
-int main(int argc, char* argv[]){ 
-
-  assert(argc == 2); 
-  FILE *f = fopen(argv[1], "r");
-  double x;
-  read_double_ascii(f, &x);
-}
