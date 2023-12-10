@@ -88,7 +88,7 @@ int read_uint_le(FILE *f, uint32_t *out) {
   return 0;
 }
 
-int read_uint_be(FILE *f, uint32_t *out) {
+int read_uint_be(FILE *f, uint32_t* out) {
     //Similar to read_uint_le, but it adds the bytes to the 
   //destination file in the opposite order
   int b0, b1, b2, b3;
@@ -113,7 +113,7 @@ int read_uint_be(FILE *f, uint32_t *out) {
     | ((uint32_t)b0 << 24);
   return 0;
 }
-/*
+
 int read_double_bin(FILE *f, double *out) {
   //Implemented similarly to read_uint_le, but I think
   //I've just made a longer integer, and the number isn't
@@ -148,7 +148,7 @@ int read_double_bin(FILE *f, double *out) {
     |((double)b7 << 56);
   return 0;
 }
-*/
+
 int write_uint_ascii(FILE *f, uint32_t x) {
   if (fprintf(f, "%u", x) < 0) {
     return 1;
@@ -186,7 +186,7 @@ int write_uint_be(FILE *f, uint32_t x) {
   return 0;
 }
 
-/*
+
 int write_double_bin(FILE *f, double x) {
   //I think this also just acts as if a double is
   //a long integer, and is not able to make decimals
@@ -201,7 +201,7 @@ int write_double_bin(FILE *f, double x) {
   fputc(x>>56, f);
   return 0;
 }
-*/
+
 
 int main(int argc, char* argv[]){ 
 
