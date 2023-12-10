@@ -49,6 +49,7 @@ int read_uint_ascii(FILE *f, uint32_t *out) {
 int read_double_ascii(FILE *f, double *out) {
   // Reads ASCII floats in input stream 
   // and updates double out value to ASCII input float.
+  skipspaces(f);
 
   double result = 0.0;  // Initialize result
   int has_sign = 0;
@@ -58,7 +59,16 @@ int read_double_ascii(FILE *f, double *out) {
 
   if (sign_char == '-') {
     has_sign = 1;
-  } else {
+  } 
+  else if (sign_char == EOF) { 
+    ungetc(sign_char, f); 
+    return EOF;
+    }
+    else if (!ispunct(sign_char) && (sign_char < '0' || sign_char > '9')) {
+      printf("Invalid character found\n");
+      return 4;
+    }
+    else{
     // Unget the character if it's not a '-'
     ungetc(sign_char, f);
   }
@@ -82,6 +92,8 @@ int read_double_ascii(FILE *f, double *out) {
     printf("Error reading decimal part.\n");
     return 3;
   }
+
+
 
   // Put it all together
   //double true_decimal = 0.0;
