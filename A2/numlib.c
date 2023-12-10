@@ -154,40 +154,22 @@ int read_uint_be(FILE *f, uint32_t *out) {
   return 0;
 }
 
-/*
 int read_double_bin(FILE *f, double *out) {
-  //Implemented similarly to read_uint_le, but I think
-  //I've just made a longer integer, and the number isn't
-  //able to make decimals, which is an issue
-  double b0, b1, b2, b3, b4, b5, b6, b7;
-  b0 = fgetc(f);
+    // Check if the file stream is valid
+    if (f == NULL) {
+        return 1; // Indicate error
+    }
 
-  if (b0 == EOF) {
-    return EOF;
-  }
-
-  b1 = fgetc(f);
-  b2 = fgetc(f);
-  b3 = fgetc(f);
-  b4 = fgetc(f); 
-  b5 = fgetc(f); 
-  b6 = fgetc(f); 
-  b7 = fgetc(f); 
-
-  if (b1 == EOF || b2 == EOF || b3 == EOF || b4 == EOF || b5 == EOF || b6 == EOF || b7 == EOF) {
-    return 1;
-  }
-
-  *out =
-    ((double)b0)
-    | ((double)b1 << 8)
-    | ((double)b2 << 16)
-    | ((double)b3 << 24)
-    |((double)b4 << 32)
-    |((double)b5 << 40)
-    |((double)b6 << 48)
-    |((double)b7 << 56);
-  return 0;
+    // read a double from the file
+    if (fread(out, sizeof(double), 1, f) == 1) {
+        return 0;
+    } else {
+        if (fgetc(f) == EOF) {
+            return EOF; // end of file encountered
+        } else {
+            return 1; // other error occurred
+        }
+    }
 }
 
 int write_uint_ascii(FILE *f, uint32_t x) {
@@ -229,26 +211,15 @@ int write_uint_be(FILE *f, uint32_t x) {
 
 
 int write_double_bin(FILE *f, double x) {
-  //I think this also just acts as if a double is
-  //a long integer, and is not able to make decimals
-  //We will see when we can test
-  fputc(x>>0,  f);
-  fputc(x>>8,  f);
-  fputc(x>>16, f);
-  fputc(x>>24, f);
-  fputc(x>>32, f);
-  fputc(x>>40, f);
-  fputc(x>>48, f);
-  fputc(x>>56, f);
-  return 0;
+    // Check if the file stream is valid
+    if (f == NULL) {
+        return 1; // Indicate error
+    }
+
+    // write the double to the file
+    if (fwrite(&x, sizeof(double), 1, f) == 1) {
+        return 0; // successfully wrote the double
+    } else {
+        return 1; // error occurred during writing
+    }
 }
-
-
-int main(int argc, char* argv[]){ 
-
-  assert(argc == 2); 
-  FILE *f = fopen(argv[1], "r");
-  double x;
-  read_double_ascii(f, &x);
-}
-*/
