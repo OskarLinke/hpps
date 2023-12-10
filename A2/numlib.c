@@ -46,8 +46,21 @@ int read_uint_ascii(FILE *f, uint32_t *out) {
 }
 
 int read_double_ascii(FILE *f, double *out) {
-  (void)f; (void)out;
-  assert(0);
+
+  double result; 
+  uint32_t before_comma;
+  uint32_t after_comma;
+  read_uint_ascii(f, &before_comma);
+  getc(f);
+  read_uint_ascii(f, &after_comma); 
+  printf("before comma: %u \n", before_comma);
+  printf("after comma: %u\n", after_comma);
+  
+  
+
+  return 0;
+
+
 }
 
 int read_uint_le(FILE *f, uint32_t *out) {
@@ -100,7 +113,7 @@ int read_uint_be(FILE *f, uint32_t *out) {
     | ((uint32_t)b0 << 24);
   return 0;
 }
-
+/*
 int read_double_bin(FILE *f, double *out) {
   //Implemented similarly to read_uint_le, but I think
   //I've just made a longer integer, and the number isn't
@@ -125,17 +138,17 @@ int read_double_bin(FILE *f, double *out) {
   }
 
   *out =
-    ((uint64_t)b0)
-    | ((uint64_t)b1 << 8)
-    | ((uint64_t)b2 << 16)
-    | ((uint64_t)b3 << 24)
-    |((uint64_t)b4 << 32)
-    |((uint64_t)b5 << 40)
-    |((uint64_t)b6 << 48)
-    |((uint64_t)b7 << 56)
+    ((double)b0)
+    | ((double)b1 << 8)
+    | ((double)b2 << 16)
+    | ((double)b3 << 24)
+    |((double)b4 << 32)
+    |((double)b5 << 40)
+    |((double)b6 << 48)
+    |((double)b7 << 56);
   return 0;
 }
-
+*/
 int write_uint_ascii(FILE *f, uint32_t x) {
   if (fprintf(f, "%u", x) < 0) {
     return 1;
@@ -173,6 +186,7 @@ int write_uint_be(FILE *f, uint32_t x) {
   return 0;
 }
 
+/*
 int write_double_bin(FILE *f, double x) {
   //I think this also just acts as if a double is
   //a long integer, and is not able to make decimals
@@ -186,4 +200,13 @@ int write_double_bin(FILE *f, double x) {
   fputc(x>>48, f);
   fputc(x>>56, f);
   return 0;
+}
+*/
+
+int main(int argc, char* argv[]){ 
+
+  assert(argc == 2); 
+  FILE *f = fopen(argv[1], "r");
+  double x;
+  read_double_ascii(f, &x);
 }
