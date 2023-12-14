@@ -7,12 +7,57 @@
 #include <math.h>
 
 struct sort_env {
+  int d;
+  const double* points;
+  const double* query;
+};
+
+double kd_dist(int d, const double *x, const double *y) {
+
+  double result = 0.0; 
+  //simply using the euclidian kd_dist formula
+  for (int i = 0; i < d; i++) {
+    result += pow((x[i] - y[i]), 2); 
+  }
+
+  if ( result == 0 ) {
+    return result;
+  }
+  result = sqrt(result); 
+
+  return result; 
+}
+
+int kd_cmp_dist(const int* x, const int* y, struct sort_env* env) {
+  int d = env-> d;
+  const double* query = env -> query;
+  const double* points = env -> points;
+
+  const double* point1 = &points[(*x) *d]; 
+  const double* point2 = &points[(*y) *d];
+
+  if (kd_dist(d, point1, query) < kd_dist(d, point2, query)) { 
+    return -1;
+
+  } else if(kd_dist(d, point1, query) == kd_dist(d, point2, query)){ 
+    return 0;
+
+  } else  { 
+    return 1;
+  }
+}
+
+
+
+
+
+struct sort_indexenv {
   int c;
   int d;
   double *points;
 };
 
-int cmp_indexes(const int *ip, const int *jp, struct sort_env* env) {
+int cmp_indexes(const int *ip, const int *jp, struct sort_indexenv* env) {
   int i = *ip;
   int j = *jp;
   double *x = &env->points[i*env->d];
@@ -54,7 +99,7 @@ struct node* kdtree_create_node(int d, const double *points, int depth, int n, i
   node->axis = axis;
 
   // Create struct for sort indexes
-  struct sort_env env;
+  struct sort_indexenv env;
   env.points = points;
   env.d = d;
   env.c = axis;
@@ -140,24 +185,57 @@ void kdtree_free(struct kdtree *tree) {
   free(tree);
 }
 
-//void kdtree_knn_node(const struct kdtree *tree, int k, const double* query,
-//                     int *closest, double *radius,
-//                     const struct node *node) {
-//  assert(0);
-//}
-//
-//int* kdtree_knn(const struct kdtree *tree, int k, const double* query) {
-//  int* closest = malloc(k * sizeof(int));
-//  double radius = INFINITY;
-//
-//  for (int i = 0; i < k; i++) {
-//    closest[i] = -1;
-//  }
+void kdtree_knn_node(const struct kdtree *tree, int k, const double* query,
+                    int *closest, double *radius,
+                    const struct node *node) {
 
-//  kdtree_knn_node(tree, k, query, closest, &radius, tree->root);
-//
-//  return closest;
-//}
+  if(node == NULL){
+    return;
+  }
+
+ if (closest[k-1] == -1) {
+    for (int i = 0; i < k-1; i++) {
+      if (closest[i] == -1) {
+        closest[i] = node->point_index;
+        //make diff comparison
+        //Call kdtree_knn_node based on that comparison
+      }
+    }
+    closest[k-1] = node->point_index;
+
+  }else if (kd_dist(tree->d, &tree->points[node->point_index], query)  < kd_dist(tree->d, &tree->points[closest[k-1]], query) ){ 
+    closest[k-1] = node->point_index;
+  }
+
+  if(closest[k-1] != -1){ 
+    //sorts the closest array by which indeces correspond to points closest to query.
+    struct sort_env env; env.d = tree->d; env.points = tree->points; env.query = query;
+    hpps_quicksort(closest, k, sizeof(int), (int (*)(const void*, const void*, void*))kd_cmp_dist, &env);
+  }
+
+  double diff = tree->points[node->point_index * tree->d + node->axis]  - query[node->axis];
+  *radius = kd_dist(tree->d, &tree->points[closest[k-1]], query);
+
+  if(diff >= 0 || *radius > fabs(diff) ){ 
+    kdtree_knn_node(tree, k, query, closest, radius, node->left);
+  }else if (diff <= 0 || *radius > fabs(diff) ){ 
+    kdtree_knn_node(tree, k, query, closest, radius, node->right);
+
+}
+}
+
+int* kdtree_knn(const struct kdtree *tree, int k, const double* query) {
+ int* closest = malloc(k * sizeof(int));
+ double radius = INFINITY;
+
+ for (int i = 0; i < k; i++) {
+   closest[i] = -1;
+ }
+
+ kdtree_knn_node(tree, k, query, closest, &radius, tree->root);
+
+ return closest;
+}
 
 void kdtree_svg_node(double scale, FILE *f, const struct kdtree *tree,
                      double x1, double y1, double x2, double y2,
@@ -194,8 +272,3 @@ void kdtree_svg(double scale, FILE* f, const struct kdtree *tree) {
   assert(tree->d == 2);
   kdtree_svg_node(scale, f, tree, 0, 0, 1, 1, tree->root);
 }
-
-//int main () {
-  // PRINT VALUES OF THE TREES
-//  return 0;
-//}

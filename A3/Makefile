@@ -10,7 +10,7 @@ sort-example: sort-example.o sort.o
 knn-bruteforce: knn-bruteforce.o bruteforce.o io.o util.o sort.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-kdtree: kdtree.o bruteforce.o io.o sort.o
+kdtree: kdtree.o bruteforce.o io.o sort.o util.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 knn-kdtree: knn-kdtree.o bruteforce.o io.o util.o kdtree.o sort.o
