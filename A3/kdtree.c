@@ -10,7 +10,7 @@ struct node {
   // Index of this node's point in the corresponding 'indexes' array.
   int point_index;
 
-  // Axis along which this node has been splot.
+  // Axis along which this node has been split.
   int axis;
 
   // The left child of the node; NULL if none.
@@ -26,17 +26,19 @@ struct kdtree {
   struct node* root;
 };
 
-struct node* kdtree_create_node(int d, const double *points,
-                                int depth, int n, int *indexes) {
-  assert(0);
+struct node* kdtree_create_node(int d, const double *points, int depth, int n, int* indexes) {
+  struct node* node;
+  int axis = (depth % d);
+  node->axis = axis;
+  int median = n / 2;
 }
 
-struct kdtree *kdtree_create(int d, int n, const double *points) {
-  struct kdtree *tree = malloc(sizeof(struct kdtree));
+struct kdtree *kdtree_create(int d, int n, const double* points) {
+  struct kdtree* tree = malloc(sizeof(struct kdtree));
   tree->d = d;
   tree->points = points;
 
-  int *indexes = malloc(sizeof(int) * n);
+  int* indexes = malloc(sizeof(int) * n);
 
   for (int i = 0; i < n; i++) {
     indexes[i] = i;
