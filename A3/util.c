@@ -60,7 +60,6 @@ int insert_if_closer(int k, int d,
       }
     }
     closest[k-1] = candidate;
-    printf("final index in closest %d \n", closest[k-1]);
     struct sort_env env; env.d = d; env.points = points; env.query = query;
     hpps_quicksort(closest, k, sizeof(int), (int (*)(const void*, const void*, void*))cmp_indexes, &env);
 
@@ -78,44 +77,3 @@ int insert_if_closer(int k, int d,
   }
   return 0;
 }
-
-int main (int argc, char* argv[]) {
-  assert(argc == 2);
-
-  FILE* f = fopen(argv[1], "r");
-
-  int n, d;
-  double* all_points = read_points(f, &n, &d);
-
-  for (int i = 0; i < n; i++) { // prints all points in point file
-      printf("Point %d: ", i);
-      for (int j = 0; j < d; j++) {
-          printf("%f ", all_points[i * d + j]);
-      }
-      printf("\n");
-  }
-  double* query = &all_points[0]; // points to the first point in all_points
-  printf("n is: %d\n", n);
-
-  int* closest = malloc(n*sizeof(int)); // instantiate closest file and populate with -1's (to show empty spaces)
-  assert(closest != NULL);
-  for (int i = 0; i < n; i++) {
-    closest[i] = -1;
-  }
-  
-  assert(closest[n-1] == -1); // assert final index is also -1
-
-  for (int i = 0; i < n; i++) {
-    insert_if_closer(n, d, all_points, closest, query, i);
-  }
-
-
-  for (int i = 0; i < n; i++) {
-    printf("%d, ", closest[i]);
-    //printf("%f", )
-  }
-  free(closest);
-
-
-  return 0;
-} 
