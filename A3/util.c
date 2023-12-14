@@ -13,17 +13,8 @@ struct sort_env {
 };
 
 int cmp_indexes(const int* x, const int* y, struct sort_env* env) {
-  printf("We have entered cmp_indexes() \n");
   int d = env-> d;
-  printf("d = %d ", d); 
   const double* query = env -> query;
-  printf("Query point: " );
-  for (int j = 0; j < d; j++) {
-          printf("%f ", query[j]);
-}
-printf("\n"); 
-
-
   const double* points = env -> points;
 
   double* point1 = &points[(*x) *d]; 
@@ -43,10 +34,14 @@ printf("\n");
 
 double distance(int d, const double *x, const double *y) {
 
-  double result =0.0; 
+  double result = 0.0; 
   //simply using the euclidian distance formula
   for (int i = 0; i < d; i++) {
-    result = result + pow((x[i] - y[i]), 2); 
+    result += pow((x[i] - y[i]), 2); 
+  }
+
+  if ( result == 0 ) {
+    return result;
   }
   result = sqrt(result); 
 
@@ -54,9 +49,8 @@ double distance(int d, const double *x, const double *y) {
 }
 
 int insert_if_closer(int k, int d,
-  const double *points, int *closest, const double *query,
-  int candidate) {
-  
+  const double *points, int *closest, 
+  const double *query, int candidate) {
   
   if (closest[k-1] == -1) {
     for (int i = 0; i < k-1; i++) {
@@ -68,10 +62,7 @@ int insert_if_closer(int k, int d,
     closest[k-1] = candidate;
     printf("final index in closest %d \n", closest[k-1]);
     struct sort_env env; env.d = d; env.points = points; env.query = query;
-    printf("her til godt nok, cand: %d\n", candidate);
     hpps_quicksort(closest, k, sizeof(int), (int (*)(const void*, const void*, void*))cmp_indexes, &env);
-    
-
 
     return 0;
   }
@@ -85,9 +76,7 @@ int insert_if_closer(int k, int d,
     hpps_quicksort(closest, k, sizeof(int), (int (*)(const void*, const void*, void*))cmp_indexes, &env);
     return 0;
   }
-  
   return 0;
-
 }
 
 int main (int argc, char* argv[]) {
@@ -98,23 +87,23 @@ int main (int argc, char* argv[]) {
   int n, d;
   double* all_points = read_points(f, &n, &d);
 
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < n; i++) { // prints all points in point file
       printf("Point %d: ", i);
       for (int j = 0; j < d; j++) {
           printf("%f ", all_points[i * d + j]);
       }
       printf("\n");
   }
-  double* query = &all_points[0];
+  double* query = &all_points[0]; // points to the first point in all_points
   printf("n is: %d\n", n);
-  int* closest = malloc(n*sizeof(int));
-  
+
+  int* closest = malloc(n*sizeof(int)); // instantiate closest file and populate with -1's (to show empty spaces)
   assert(closest != NULL);
   for (int i = 0; i < n; i++) {
     closest[i] = -1;
   }
   
-  assert(closest[n-1] == -1);
+  assert(closest[n-1] == -1); // assert final index is also -1
 
   for (int i = 0; i < n; i++) {
     insert_if_closer(n, d, all_points, closest, query, i);
