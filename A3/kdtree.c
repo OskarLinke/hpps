@@ -6,6 +6,28 @@
 #include <assert.h>
 #include <math.h>
 
+struct sort_env {
+  int c;
+  int d;
+  double *points;
+};
+
+int cmp_indexes(const int *ip, const int *jp, struct sort_env* env) {
+  int i = *ip;
+  int j = *jp;
+  double *x = &env->points[i*env->d];
+  double *y = &env->points[j*env->d];
+  int c = env->c;
+
+  if (x[c] < y[c]) {
+    return -1;
+  } else if (x[c] == y[c]) {
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
 struct node {
   // Index of this node's point in the corresponding 'indexes' array.
   int point_index;
@@ -27,10 +49,55 @@ struct kdtree {
 };
 
 struct node* kdtree_create_node(int d, const double *points, int depth, int n, int* indexes) {
-  struct node* node;
+  struct node* node = malloc(sizeof(struct node));
   int axis = (depth % d);
   node->axis = axis;
-  int median = n / 2;
+
+  // Create struct for sort indexes
+  struct sort_env env;
+  env.points = points;
+  env.d = d;
+  env.c = axis;
+
+  if ( n > 2 ) {
+  // Sort indexes on dim axis.
+    for (int i = 0; i < n; i++) {
+      hpps_quicksort(&indexes[i*d], d, sizeof(int),
+                     (int (*)(const void*, const void*, void*))cmp_indexes,
+                     &env); }
+
+    int median = indexes[n/2];
+    node->point_index = median;
+
+    // Recursively call left and right child
+    node-> left = kdtree_create_node(d, points, depth +1, (n-n/2), indexes[0]);
+    node-> right = kdtree_create_node(d, points, depth +1, n/2, indexes[n-n/2]);
+    return node;
+  }
+
+  if ( n == 2 ) {
+  // Sort indexes on dim axis.
+    for (int i = 0; i < n; i++) {
+      hpps_quicksort(&indexes[i*d], d, sizeof(int),
+                     (int (*)(const void*, const void*, void*))cmp_indexes,
+                     &env); }
+
+    int median = indexes[n/2];
+    node->point_index = median;
+
+    node-> left = kdtree_create_node(d, points, depth +1, (n-n/2), indexes[0]);
+    node-> right = NULL;
+    return node;
+  }
+
+  if ( n == 1 ) {
+    int median = indexes[0];
+    node->point_index = median;
+
+    node-> left = NULL;
+    node-> right = NULL;
+    return node;
+  }
 }
 
 struct kdtree *kdtree_create(int d, int n, const double* points) {
