@@ -13,28 +13,37 @@ struct sort_env {
 };
 
 int cmp_indexes(const int* x, const int* y, struct sort_env* env) {
+  printf("We have entered cmp_indexes() \n");
   int d = env-> d;
+  printf("d = %d ", d); 
   const double* query = env -> query;
+  printf("Query point: " );
+  for (int j = 0; j < d; j++) {
+          printf("%f ", query[j]);
+}
+printf("\n"); 
+
+
   const double* points = env -> points;
 
-  double xval = points[ *x * d];
-  double yval = points[ *y * d];
+  double* point1 = &points[(*x) *d]; 
+  double* point2 = &points[(*y) *d];
 
-  if (distance(d, &xval, query) < distance(d, &yval, query)) { 
-    return 1;
+  if (distance(d, point1, query) < distance(d, point2, query)) { 
+    return -1;
 
-  } else if(distance(d, &xval, query) == distance(d, &yval, query)){ 
+  } else if(distance(d, point1, query) == distance(d, point2, query)){ 
     return 0;
 
   } else  { 
-    return -1;
+    return 1;
   }
 }
 
 
 double distance(int d, const double *x, const double *y) {
 
-  double result; 
+  double result =0.0; 
   //simply using the euclidian distance formula
   for (int i = 0; i < d; i++) {
     result = result + pow((x[i] - y[i]), 2); 
@@ -120,4 +129,4 @@ int main (int argc, char* argv[]) {
 
 
   return 0;
-}
+} 
