@@ -1,5 +1,7 @@
 #include "io.h"
 #include "bruteforce.h"
+#include "util.h"
+#include "sort.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>

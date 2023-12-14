@@ -12,13 +12,13 @@ struct sort_env {
   const double* query;
 };
 
-int cmp_indexes(const int* x, const int* y, struct sort_env* env) {
+int cmp_distances(const int* x, const int* y, struct sort_env* env) {
   int d = env-> d;
   const double* query = env -> query;
   const double* points = env -> points;
 
-  double* point1 = &points[(*x) *d]; 
-  double* point2 = &points[(*y) *d];
+  const double* point1 = &points[(*x) *d]; 
+  const double* point2 = &points[(*y) *d];
 
   if (distance(d, point1, query) < distance(d, point2, query)) { 
     return -1;
@@ -61,7 +61,7 @@ int insert_if_closer(int k, int d,
     }
     closest[k-1] = candidate;
     struct sort_env env; env.d = d; env.points = points; env.query = query;
-    hpps_quicksort(closest, k, sizeof(int), (int (*)(const void*, const void*, void*))cmp_indexes, &env);
+    hpps_quicksort(closest, k, sizeof(int), (int (*)(const void*, const void*, void*))cmp_distances, &env);
 
     return 0;
   }
@@ -72,7 +72,7 @@ int insert_if_closer(int k, int d,
   if (df_cand < df_farthest) {
     closest[k-1] = candidate;
     struct sort_env env; env.d = d; env.points = points; env.query = query;
-    hpps_quicksort(closest, k, sizeof(int), (int (*)(const void*, const void*, void*))cmp_indexes, &env);
+    hpps_quicksort(closest, k, sizeof(int), (int (*)(const void*, const void*, void*))cmp_distances, &env);
     return 0;
   }
   return 0;

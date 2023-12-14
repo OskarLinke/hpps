@@ -7,7 +7,10 @@ all: sort-example knn-bruteforce knn-svg knn-kdtree knn-genpoints
 sort-example: sort-example.o sort.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-knn-bruteforce: knn-bruteforce.o bruteforce.o io.o util.o
+knn-bruteforce: knn-bruteforce.o bruteforce.o io.o util.o sort.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+kdtree: kdtree.o bruteforce.o io.o sort.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 knn-kdtree: knn-kdtree.o bruteforce.o io.o util.o kdtree.o sort.o

@@ -1,6 +1,6 @@
 #include "kdtree.h"
 #include "sort.h"
-#include "util.h"
+#include "io.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
@@ -61,43 +61,50 @@ struct node* kdtree_create_node(int d, const double *points, int depth, int n, i
 
   if ( n > 2 ) {
   // Sort indexes on dim axis.
-    for (int i = 0; i < n; i++) {
-      hpps_quicksort(&indexes[i*d], d, sizeof(int),
+    hpps_quicksort(indexes, n, sizeof(int),
                      (int (*)(const void*, const void*, void*))cmp_indexes,
-                     &env); }
+                     &env);
+    //printf("Enteredd kdtree_create_node\n");
 
     int median = indexes[n/2];
     node->point_index = median;
 
+    // Print node info
+    //printf("Created node: Index=%d, Axis=%d\n", node->point_index, node->axis);
+
     // Recursively call left and right child
-    node-> left = kdtree_create_node(d, points, depth +1, (n-n/2), indexes[0]);
-    node-> right = kdtree_create_node(d, points, depth +1, n/2, indexes[n-n/2]);
+    node-> left = kdtree_create_node(d, points, depth +1, (n-n/2), &indexes[0]);
+    node-> right = kdtree_create_node(d, points, depth +1, n/2, &indexes[n-n/2]);
     return node;
   }
 
   if ( n == 2 ) {
   // Sort indexes on dim axis.
-    for (int i = 0; i < n; i++) {
-      hpps_quicksort(&indexes[i*d], d, sizeof(int),
+      hpps_quicksort(indexes, n, sizeof(int),
                      (int (*)(const void*, const void*, void*))cmp_indexes,
-                     &env); }
+                     &env);
 
     int median = indexes[n/2];
     node->point_index = median;
 
-    node-> left = kdtree_create_node(d, points, depth +1, (n-n/2), indexes[0]);
+    // Print node info
+    //printf("IN N == 2 ### Created node: Index=%d, Axis=%d\n", node->point_index, node->axis);
+
+    node-> left = kdtree_create_node(d, points, depth +1, (n-n/2), &indexes[0]);
     node-> right = NULL;
     return node;
   }
 
-  if ( n == 1 ) {
-    int median = indexes[0];
-    node->point_index = median;
+  int median = indexes[0];
+  node->point_index = median;
 
-    node-> left = NULL;
-    node-> right = NULL;
-    return node;
-  }
+  // Print node info
+  //printf("N SHOULD BE == 1 ### Created node: Index=%d, Axis=%d\n", node->point_index, node->axis);
+
+  node-> left = NULL;
+  node-> right = NULL;
+  return node;
+  
 }
 
 struct kdtree *kdtree_create(int d, int n, const double* points) {
@@ -112,14 +119,20 @@ struct kdtree *kdtree_create(int d, int n, const double* points) {
   }
 
   tree->root = kdtree_create_node(d, points, 0, n, indexes);
-
   free(indexes);
 
   return tree;
 }
 
 void kdtree_free_node(struct node *node) {
-  assert(0);
+  if (node->left != NULL) {
+
+  kdtree_free_node(node->left);
+  }
+  if (node->right != NULL) {
+  kdtree_free_node(node->right);
+  }
+  free(node);
 }
 
 void kdtree_free(struct kdtree *tree) {
@@ -127,24 +140,24 @@ void kdtree_free(struct kdtree *tree) {
   free(tree);
 }
 
-void kdtree_knn_node(const struct kdtree *tree, int k, const double* query,
-                     int *closest, double *radius,
-                     const struct node *node) {
-  assert(0);
-}
+//void kdtree_knn_node(const struct kdtree *tree, int k, const double* query,
+//                     int *closest, double *radius,
+//                     const struct node *node) {
+//  assert(0);
+//}
+//
+//int* kdtree_knn(const struct kdtree *tree, int k, const double* query) {
+//  int* closest = malloc(k * sizeof(int));
+//  double radius = INFINITY;
+//
+//  for (int i = 0; i < k; i++) {
+//    closest[i] = -1;
+//  }
 
-int* kdtree_knn(const struct kdtree *tree, int k, const double* query) {
-  int* closest = malloc(k * sizeof(int));
-  double radius = INFINITY;
-
-  for (int i = 0; i < k; i++) {
-    closest[i] = -1;
-  }
-
-  kdtree_knn_node(tree, k, query, closest, &radius, tree->root);
-
-  return closest;
-}
+//  kdtree_knn_node(tree, k, query, closest, &radius, tree->root);
+//
+//  return closest;
+//}
 
 void kdtree_svg_node(double scale, FILE *f, const struct kdtree *tree,
                      double x1, double y1, double x2, double y2,
@@ -181,3 +194,8 @@ void kdtree_svg(double scale, FILE* f, const struct kdtree *tree) {
   assert(tree->d == 2);
   kdtree_svg_node(scale, f, tree, 0, 0, 1, 1, tree->root);
 }
+
+//int main () {
+  // PRINT VALUES OF THE TREES
+//  return 0;
+//}
