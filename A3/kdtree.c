@@ -118,8 +118,8 @@ struct node* kdtree_create_node(int d, const double *points, int depth, int n, i
     //printf("Created node: Index=%d, Axis=%d\n", node->point_index, node->axis);
 
     // Recursively call left and right child
-    node-> left = kdtree_create_node(d, points, depth +1, (n-n/2), &indexes[0]);
-    node-> right = kdtree_create_node(d, points, depth +1, n/2, &indexes[n-n/2]);
+    node-> left = kdtree_create_node(d, points, depth +1, (n/2), &indexes[0]);
+    node-> right = kdtree_create_node(d, points, depth +1, n-n/2-1, &indexes[n/2+1]);
     return node;
   }
 
@@ -217,9 +217,11 @@ void kdtree_knn_node(const struct kdtree *tree, int k, const double* query,
   *radius = kd_dist(tree->d, &tree->points[closest[k-1]], query);
 
   if(diff >= 0 || *radius > fabs(diff) ){ 
-    kdtree_knn_node(tree, k, query, closest, radius, node->left);
+    *radius = diff;
+    kdtree_knn_node(tree, k, query, closest, &diff, node->left);
   }else if (diff <= 0 || *radius > fabs(diff) ){ 
-    kdtree_knn_node(tree, k, query, closest, radius, node->right);
+    *radius = diff;
+    kdtree_knn_node(tree, k, query, closest, &diff, node->right);
 
 }
 }
