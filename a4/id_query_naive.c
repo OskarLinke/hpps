@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <errno.h>
 #include <assert.h>
-
+#include <ctype.h>
 #include "record.h"
 #include "id_query.h"
 
@@ -15,18 +15,29 @@ struct naive_data {
 };
 
 struct naive_data* mk_naive(struct record* rs, int n) {
-  // TODO
-  assert(0);
+  struct naive_data* data = malloc(n * sizeof(struct record));
+  
+  data->rs = rs; 
+  data->n = n;
+  return data;
 }
 
 void free_naive(struct naive_data* data) {
-  // TODO
-  assert(0);
+  for(int i = 0; i < data->n; i++){
+    free(&data->rs[i]);
+  }
+  free(data);
 }
 
-const struct record* lookup_naive(struct naive_data *data, int64_t needle) {
-  // TODO
-  assert(0);
+const struct record* lookup_naive(struct naive_data* data, int64_t needle) {
+  struct record* rs = data->rs; 
+  for (int i= 0; i < data->n; i++ ){ 
+    if(needle == rs[i].osm_id){ 
+      return &rs[i];
+    }
+  } 
+  return NULL;
+
 }
 
 int main(int argc, char** argv) {
