@@ -49,11 +49,16 @@ const struct record* lookup_naive(struct naive_data* data, double lon, double la
   double current_closest = distance(data->rs[0].lat, data->rs[0].lon, lat, lon);
   int cc_index = 0;
 
+  // instantiate once for good temporal locality 
+  double tmp_lon;
+  double tmp_lat;
+  double query_dist;
+ 
   // iterate and compare between the remaining 1 upto n entries.
   for (int i = 1; i < data->n; i++) {
-    double tmp_lon = data->rs[i].lon;
-    double tmp_lat = data->rs[i].lat;
-    double query_dist = distance(tmp_lat, tmp_lon, lat, lon);
+    tmp_lon = data->rs[i].lon;
+    tmp_lat = data->rs[i].lat;
+    query_dist = distance(tmp_lat, tmp_lon, lat, lon);
     if (query_dist < current_closest) {
       current_closest = query_dist;
       cc_index = i;
