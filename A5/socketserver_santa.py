@@ -17,6 +17,65 @@ class SantaHandler(socketserver.StreamRequestHandler):
         # by naive_santa.py, but must also account for any concurrency issues 
         # (races and deadlock) that arise from this
 
+                # If the message has an additional payload, then separate the variables
+        if b'-' in msg:
+            body = msg[msg.index(b'-')+1:]
+            msg = msg[:msg.index(b'-')]
+
+        # This message will be sent by each reindeer in turn, as they finish 
+        # their holiday
+        if msg == MSG_HOLIDAY_OVER:
+            # Part of the message will be the address of the reindeer, separate
+            # the two parts
+            reindeer_host = body[:body.index(b':')].decode()
+            reindeer_port = int(body[body.index(b':')+1:].decode())
+
+            # Append them to a list of collected reindeer addresses
+            self.server.reindeer_counter.append((reindeer_host, reindeer_port))
+
+
+            # If we've collected all reindeer addresses, then tell them all 
+            # that we can deliver
+            if len(self.server.reindeer_counter) == self.server.num_reindeer:
+                # Deliver presents                
+                print(f"Santa is delivering presents with all {self.server.num_reindeer} the reindeer")
+                # Tell each reindeer to deliver
+                for host, port in self.server.reindeer_counter:
+                    sending_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sending_socket.connect((host, port))
+                    sending_socket.sendall(MSG_DELIVER_PRESENTS)
+                    sending_socket.close()
+                # Reset the reindeer address collection
+                self.server.reindeer_counter = []
+
+        # This message will be sent by any elves that encounter a problem
+        elif msg == MSG_PROBLEM:
+            
+            elf_host = body[:body.index(b':')].decode()
+            elf_port = int(body[body.index(b':')+1:].decode())
+
+            # Append to elf list
+            self.server.elf_counter.append((elf_host, elf_port))
+
+            if len(self.server.elf_counter) == self.server.elf_group:
+                # fucking elverproblemer
+                print(f"Santa is dealing with all {len(self.server.elf_counter)} elf problems")
+
+                # Fix every problem
+                for host, port in self.server.elf_counter:
+                    sending_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sending_socket.connect((host, port))
+                    sending_socket.sendall(MSG_SORT_PROBLEM)
+                    sending_socket.close()
+                
+                # Reset elf counter
+                self.server.elf_counter = []                
+
+        # If we get something we didn't expect then abort
+        else:
+            print(f"Santa recieved an unknown instruction")
+            exit()
+
         # Checkin function will 'check in' with a checkin process, if one is 
         # available. This can be removed if you are confident in your answer 
         # and want to avoid the slowdown it adds
