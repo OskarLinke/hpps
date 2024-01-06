@@ -14,6 +14,7 @@ def santa(host, port, num_reindeer, elf_group):
 
     # Setup the lists for collecting reindeer and elf addresses (hint)
     reindeer_counter = []
+    elf_counter = []
 
     # Run forever, its a thankless life always being awoken by these reindeer 
     # and elves
@@ -40,6 +41,7 @@ def santa(host, port, num_reindeer, elf_group):
             # Append them to a list of collected reindeer addresses
             reindeer_counter.append((reindeer_host, reindeer_port))
 
+
             # If we've collected all reindeer addresses, then tell them all 
             # that we can deliver
             if len(reindeer_counter) == num_reindeer:
@@ -56,11 +58,26 @@ def santa(host, port, num_reindeer, elf_group):
 
         # This message will be sent by any elves that encounter a problem
         elif msg == MSG_PROBLEM:
-            # TODO You need to implement some code here that will message elves
-            # when enough of them have a problem. As in the case of reindeer 
-            # delivering presents, you just need to get santa and the relevent 
-            # elves printing a message at approximately the same time.
-            pass 
+            
+            elf_host = body[:body.index(b':')].decode()
+            elf_port = int(body[body.index(b':')+1:].decode())
+
+            # Append to elf list
+            elf_counter.append((elf_host, elf_port))
+
+            if len(elf_counter) == elf_group:
+                # fucking elverproblemer
+                print(f"Santa is dealing with all {len(elf_counter)} elf problems")
+
+                # Fix every problem
+                for host, port in elf_counter:
+                    sending_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    sending_socket.connect((host, port))
+                    sending_socket.sendall(MSG_SORT_PROBLEM)
+                    sending_socket.close()
+                
+                # Reset elf counter
+                elf_counter = []                
 
         # If we get something we didn't expect then abort
         else:
