@@ -15,7 +15,7 @@ struct naive_data {
 };
 
 struct naive_data* mk_naive(struct record* rs, int n) {
-  struct naive_data* data = malloc(n * sizeof(struct record));
+  struct naive_data* data = malloc(sizeof(struct naive_data));
   
   data->rs = rs; 
   data->n = n;
@@ -23,9 +23,7 @@ struct naive_data* mk_naive(struct record* rs, int n) {
 }
 
 void free_naive(struct naive_data* data) {
-  for(int i = 0; i < data->n; i++){
-    free(&data->rs[i]);
-  }
+  // we've malloced for naive_data, so we free naive_data (just a pointer and an int).
   free(data);
 }
 

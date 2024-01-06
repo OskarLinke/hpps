@@ -58,11 +58,10 @@ struct indexed_data* mk_indexed(struct record* rs, int n) {
 }
 
 void free_indexed(struct indexed_data* data) {
+  // Free space for each of the records we've malloced for. We malloced n*index_record and indexed_data.
   for(int i = 0; i< data->n; i++){ 
-    free(&data->irs[i].record[0]);
     free(&data->irs[i]);
   }
-
   free(data);
 }
 
