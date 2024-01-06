@@ -12,12 +12,7 @@ class SantaHandler(socketserver.StreamRequestHandler):
         # Read the message
         msg = self.request.recv(MAX_MSG_LEN)
 
-        # TODO You must implement a handler function that can handle mutiple 
-        # different messages at the same time. This might be heavily 'inspired'
-        # by naive_santa.py, but must also account for any concurrency issues 
-        # (races and deadlock) that arise from this
-
-                # If the message has an additional payload, then separate the variables
+        # If the message has an additional payload, then separate the variables
         if b'-' in msg:
             body = msg[msg.index(b'-')+1:]
             msg = msg[:msg.index(b'-')]
@@ -31,6 +26,7 @@ class SantaHandler(socketserver.StreamRequestHandler):
             reindeer_port = int(body[body.index(b':')+1:].decode())
 
             # Append them to a list of collected reindeer addresses
+            self.server.lock.acquire()
             self.server.reindeer_counter.append((reindeer_host, reindeer_port))
 
 
@@ -47,6 +43,9 @@ class SantaHandler(socketserver.StreamRequestHandler):
                     sending_socket.close()
                 # Reset the reindeer address collection
                 self.server.reindeer_counter = []
+                self.server.lock.release()
+            else:
+                self.server.lock.release()
 
         # This message will be sent by any elves that encounter a problem
         elif msg == MSG_PROBLEM:
@@ -54,7 +53,9 @@ class SantaHandler(socketserver.StreamRequestHandler):
             elf_host = body[:body.index(b':')].decode()
             elf_port = int(body[body.index(b':')+1:].decode())
 
+
             # Append to elf list
+            self.server.lock.acquire()
             self.server.elf_counter.append((elf_host, elf_port))
 
             if len(self.server.elf_counter) == self.server.elf_group:
@@ -69,7 +70,10 @@ class SantaHandler(socketserver.StreamRequestHandler):
                     sending_socket.close()
                 
                 # Reset elf counter
-                self.server.elf_counter = []                
+                self.server.elf_counter = [] 
+                self.server.lock.release()
+            else: 
+                self.server.lock.release()              
 
         # If we get something we didn't expect then abort
         else:
@@ -94,6 +98,8 @@ class SantaServer(socketserver.ThreadingTCPServer):
         # Setup the lists for collecting reindeer and elf addresses
         self.reindeer_counter = []
         self.elf_counter = []
+        # Instantiate lock
+        self.lock = Lock()
 
 # Base santa function, to be called as a process
 def santa(host, port, num_reindeer, elf_group):
