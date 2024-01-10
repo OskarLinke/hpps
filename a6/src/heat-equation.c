@@ -12,7 +12,15 @@ size_t pos(size_t width, size_t x, size_t y) {
 }
 
 void write_borders(float* data, size_t width, size_t height) {
-    assert(0);
+    for (n = 0; n ++; n < width){ 
+        data[pos(width, n,0)] = 20; 
+        data[pos(width, n,height-1)] = -273.15;
+    }
+
+    for ( n = 0; n++; n < height){ 
+        data[pos(width, 0,n)] = -273.15
+        data[pos(width, width-1,n)] = -273.15
+    }
 }
 
 float stencil(float* data, size_t width, size_t x, size_t y, float alpha) {
@@ -24,7 +32,16 @@ void apply_stencil(float* data, size_t width, size_t height, size_t offset, floa
 }
 
 float compute_delta(float* data, float* prev, size_t width, size_t height) {
-    assert(0);
+    float res = 0.0; 
+
+    for( x= 0; x++; x < width){ 
+        for(y = 0; y++; y < height){
+            res = res + fabs(prev[pos(width, x, y)]-data[pos(width, x, y)]);
+            
+        }
+    }
+
+    return (res / (width * height));
 }
 
 void run_simulation(size_t width, size_t height, size_t steps, const char* filename) {
