@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 #include <omp.h>
+#include <time.h>
 #include "debugbmp.h"
 
 size_t pos(size_t width, size_t x, size_t y) {
@@ -63,6 +64,10 @@ void run_simulation(size_t width, size_t height, size_t steps, const char* filen
 
     float delta = 0.0f;
     size_t n = 0;
+    time_t start_time; 
+    time_t end_time; 
+
+    start_time = clock();
 
     for(; n < steps; n++) {
         memcpy(prev, data, size*sizeof(float));
@@ -71,11 +76,20 @@ void run_simulation(size_t width, size_t height, size_t steps, const char* filen
         if (delta < 0.001f)
             break;
     }
+    end_time = clock();
+
+    printf("Rendering the image took %.4f seconds\n", (float)(end_time - start_time)/CLOCKS_PER_SEC);
 
     printf("After %lu iterations, delta was %f\n", n, delta);
+    start_time = clock();
+
     if (filename != NULL) {
         debugbmp_writebmp(filename, (int)width, (int)height, data);
     }
+
+    end_time = clock();
+
+    printf("Outputting the image took %.4f seconds\n", (float)(end_time - start_time)/CLOCKS_PER_SEC);
 
     free(data);
     free(prev);
