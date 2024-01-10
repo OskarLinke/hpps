@@ -18,8 +18,8 @@ void write_borders(float* data, size_t width, size_t height) {
     }
 
     for ( int n = 0; n < height ; n++){ 
-        data[pos(width, 0,n)] = -273.15
-        data[pos(width, width-1,n)] = -273.15
+        data[pos(width, 0,n)] = -273.15;
+        data[pos(width, width-1,n)] = -273.15;
     }
 }
 
