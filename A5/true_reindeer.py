@@ -31,9 +31,28 @@ def go_on_holiday(me, my_host, my_port, stable_host, stable_port):
 def wait_for_reply(me, listening_socket, my_host, my_port):
     # Wait on the listening port to get a connection request
     connection, _ = listening_socket.accept()
-
-    # TODO You must implement how a reindeer will wait for a reply from the 
-    # stable. 
+    
+    msg = b''
+    
+    while msg != MSG_DELIVER_PRESENTS: 
+        # Read from the connection
+        msg = connection.recv(MAX_MSG_LEN)
+        if b'-' in msg:
+            santa_host_and_port = msg[msg.index(b'-')+1:]
+            msg = msg[:msg.index(b'-')]
+            santa_host = santa_host_and_port[:santa_host_and_port.index(b':')].decode()
+            santa_port = int(santa_host_and_port[santa_host_and_port.index(b':')+1:].decode())
+        if msg == MSG_NOTIFY:
+            
+            sending_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            sending_socket.connect((santa_host, santa_port))
+            sending_socket.sendall(MSG_DELIVER_PRESENTS)
+            sending_socket.close()
+        # If we get something we didn't expect then abort
+        if msg != (MSG_DELIVER_PRESENTS or MSG_NOTIFY):
+            print(f"Reindeer {me} recieved an unknown instruction")
+            exit()
+    print(f"Reindeer {me} is delivering presents")
 
 
 # Base reindeer function, to be called as a process
