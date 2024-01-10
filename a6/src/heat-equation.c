@@ -13,14 +13,15 @@ size_t pos(size_t width, size_t x, size_t y) {
 }
 
 void write_borders(float* data, size_t width, size_t height) {
+    #pragma omp parallel for schedule(static) // schedule included for readbility. It is default by OpenMP.
     for (size_t n = 0; n < width ; n ++){ 
-        data[pos(width, n,0)] = 20; 
-        data[pos(width, n,height-1)] = -273.15;
+        data[pos(width, n, 0)] = 20; 
+        data[pos(width, n, height-1)] = -273.15;
     }
-
+    #pragma omp parallel for schedule(static)
     for ( size_t n = 0; n < height ; n++){ 
-        data[pos(width, 0,n)] = -273.15;
-        data[pos(width, width-1,n)] = -273.15;
+        data[pos(width, 0, n)] = -273.15;
+        data[pos(width, width-1, n)] = -273.15;
     }
 }
 
@@ -45,7 +46,7 @@ float compute_delta(float* data, float* prev, size_t width, size_t height) {
 
     for( size_t x= 0; x < width ; x++){ 
         for(size_t y = 0; y < height ; y++){
-            res = res + fabs(prev[pos(width, x, y)]-data[pos(width, x, y)]);
+            res = res + fabs(prev[pos(width, x, y)] - data[pos(width, x, y)]);
             
         }
     }
