@@ -4,12 +4,17 @@ import ctypes
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import time
 
 # Set this to True to use the C-accelerated implementation.
 use_c = True
 
 # Prepare to load C library
 heateqclib = None
+
+# Prepares start and end time values for use in reporting running time
+start_time = None
+end_time = None
 
 def use_clib():
     global heateqclib
@@ -87,6 +92,8 @@ def run_simulation(width, height, steps):
     delta = 0.0
     n = 0
 
+    start_time = time.time()
+
     for n in range(0, steps):
         # Copy all items from data into prev
         # prev[:] = data
@@ -98,12 +105,18 @@ def run_simulation(width, height, steps):
         if delta < 0.001:
             break
 
+    end_time = time.time()
+
     # Report the value
     print("After %d iterations, delta was: %f" % (n+1, delta))
 
+    print("Rendering the image took %f seconds" % (end_time - start_time) )
+    start_time = time.time()
     # Make 2D for plotting
     plt.imshow(np.reshape(data, (width, height)), interpolation="none")
     plt.show()
+    end_time = time.time()
+    print("Outputting the image took %f seconds" % (end_time - start_time) )
 
 if __name__ == "__main__":
     if use_c:
