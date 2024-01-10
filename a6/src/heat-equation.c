@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <omp.h>
 #include <time.h>
 #include "debugbmp.h"
 
@@ -13,7 +12,7 @@ size_t pos(size_t width, size_t x, size_t y) {
 }
 
 void write_borders(float* data, size_t width, size_t height) {
-    #pragma omp parallel for schedule(static) // schedule included for readbility. It is default by OpenMP.
+
     for (size_t n = 0; n < width ; n ++){ 
         data[pos(width, n, 0)] = 20; 
         data[pos(width, n, height-1)] = -273.15;
