@@ -12,12 +12,12 @@ size_t pos(size_t width, size_t x, size_t y) {
 }
 
 void write_borders(float* data, size_t width, size_t height) {
-    for (n = 0; n ++; n < width){ 
+    for (int n = 0; n < width ; n ++){ 
         data[pos(width, n,0)] = 20; 
         data[pos(width, n,height-1)] = -273.15;
     }
 
-    for ( n = 0; n++; n < height){ 
+    for ( int n = 0; n < height ; n++){ 
         data[pos(width, 0,n)] = -273.15
         data[pos(width, width-1,n)] = -273.15
     }
@@ -34,8 +34,8 @@ void apply_stencil(float* data, size_t width, size_t height, size_t offset, floa
 float compute_delta(float* data, float* prev, size_t width, size_t height) {
     float res = 0.0; 
 
-    for( x= 0; x++; x < width){ 
-        for(y = 0; y++; y < height){
+    for( int x= 0; x < width ; x++){ 
+        for(int y = 0; y < height ; y++){
             res = res + fabs(prev[pos(width, x, y)]-data[pos(width, x, y)]);
             
         }
