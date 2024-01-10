@@ -4,6 +4,7 @@
 #include <string.h>
 #include <assert.h>
 #include <omp.h>
+#include "timing.h"
 #include "debugbmp.h"
 
 size_t pos(size_t width, size_t x, size_t y) {
@@ -28,16 +29,15 @@ float stencil(float* data, size_t width, size_t x, size_t y, float alpha) {
     return (alpha * (data[pos(width, x,y)] + data[pos(width, x-1,y)] + data[pos(width, x+1,y)] + data[pos(width, x,y-1)] + data[pos(width, x,y+1)]));
 }
 
-void apply_stencil(float* data, size_t width, size_t height, size_t offset, float alpha) {
-
-   for (size_t x = 1; x < (width-1); x++) {
-    for (size_t y = (1 + (x+offset)%2); y < (height-1); y += 2) {
-        data[pos(width, x, y)] = stencil(data, width, x, y, alpha);
-    }
-   }
-
-}
-
+void apply_stencil(float* data, float* prev,size_t width, size_t height, size_t offset, float alpha) {
+        #pragma omp parallel for
+        for (size_t x = 1; x < (width-1); x++) {
+          #pragma omp parallel for
+          for (size_t y = (1 + (x+offset)%2); y < (height-1); y += 2) {
+            data[pos(width, x, y)] = stencil(prev, width, x, y, alpha);
+        }
+    }    
+  }
 
 
 float compute_delta(float* data, float* prev, size_t width, size_t height) {
@@ -65,13 +65,16 @@ void run_simulation(size_t width, size_t height, size_t steps, const char* filen
     float delta = 0.0f;
     size_t n = 0;
 
+    double start_time = seconds();
     for(; n < steps; n++) {
         memcpy(prev, data, size*sizeof(float));
-        apply_stencil(data, width, height, n % 2, 0.2f);
+        apply_stencil(data, prev, width, height, n % 2, 0.2f);
         delta = compute_delta(data, prev, width, height);
         if (delta < 0.001f)
             break;
     }
+    double end_time = seconds();
+    printf("Rendering time: %f\n", (end_time - start_time));
 
     printf("After %lu iterations, delta was %f\n", n, delta);
     if (filename != NULL) {
