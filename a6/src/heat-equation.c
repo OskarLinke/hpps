@@ -7,7 +7,8 @@
 #include "debugbmp.h"
 
 size_t pos(size_t width, size_t x, size_t y) {
-    assert(0);
+    size_t result = width*y + x;
+    return result;
 }
 
 void write_borders(float* data, size_t width, size_t height) {
@@ -84,4 +85,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-
