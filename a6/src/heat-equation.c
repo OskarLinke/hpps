@@ -28,8 +28,16 @@ float stencil(float* data, size_t width, size_t x, size_t y, float alpha) {
 }
 
 void apply_stencil(float* data, size_t width, size_t height, size_t offset, float alpha) {
-    assert(0);
+
+   for (int x = 1; x < (width-1); x++) {
+    for (int y = (1 + (x+offset)%2); y < (height-1); y += 2) {
+        data[pos(width, x, y)] = stencil(data, width, x, y, alpha);
+    }
+   }
+
 }
+
+
 
 float compute_delta(float* data, float* prev, size_t width, size_t height) {
     float res = 0.0; 
