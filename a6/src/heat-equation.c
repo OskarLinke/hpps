@@ -15,7 +15,7 @@ void write_borders(float* data, size_t width, size_t height) {
 }
 
 float stencil(float* data, size_t width, size_t x, size_t y, float alpha) {
-    assert(0);
+    return float alpha * (data[pos(width, x,y)] + data[pos(width, x-1,y)] + data[pos(width, x+1,y)] + data[pos(width, x,y-1)] + data[pos(width, x,y+1)]);
 }
 
 void apply_stencil(float* data, size_t width, size_t height, size_t offset, float alpha) {
