@@ -7,11 +7,20 @@
 #include "debugbmp.h"
 
 size_t pos(size_t width, size_t x, size_t y) {
-    assert(0);
+    size_t result = width*y + x;
+    return result;
 }
 
 void write_borders(float* data, size_t width, size_t height) {
-    assert(0);
+    for (int n = 0; n < width ; n ++){ 
+        data[pos(width, n,0)] = 20; 
+        data[pos(width, n,height-1)] = -273.15;
+    }
+
+    for ( int n = 0; n < height ; n++){ 
+        data[pos(width, 0,n)] = -273.15
+        data[pos(width, width-1,n)] = -273.15
+    }
 }
 
 float stencil(float* data, size_t width, size_t x, size_t y, float alpha) {
@@ -19,11 +28,28 @@ float stencil(float* data, size_t width, size_t x, size_t y, float alpha) {
 }
 
 void apply_stencil(float* data, size_t width, size_t height, size_t offset, float alpha) {
-    assert(0);
+
+   for (int x = 1; x < (width-1); x++) {
+    for (int y = (1 + (x+offset)%2); y < (height-1); y += 2) {
+        data[pos(width, x, y)] = stencil(data, width, x, y, alpha);
+    }
+   }
+
 }
 
+
+
 float compute_delta(float* data, float* prev, size_t width, size_t height) {
-    assert(0);
+    float res = 0.0; 
+
+    for( int x= 0; x < width ; x++){ 
+        for(int y = 0; y < height ; y++){
+            res = res + fabs(prev[pos(width, x, y)]-data[pos(width, x, y)]);
+            
+        }
+    }
+
+    return (res / (width * height));
 }
 
 void run_simulation(size_t width, size_t height, size_t steps, const char* filename) {
@@ -84,4 +110,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-
