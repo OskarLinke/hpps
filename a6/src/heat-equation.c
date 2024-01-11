@@ -66,10 +66,7 @@ void run_simulation(size_t width, size_t height, size_t steps, const char* filen
 
     float delta = 0.0f;
     size_t n = 0;
-    time_t start_time; 
-    time_t end_time; 
 
-    start_time = clock();
 
     double start_time = seconds();
     for(; n < steps; n++) {
@@ -83,15 +80,15 @@ void run_simulation(size_t width, size_t height, size_t steps, const char* filen
     printf("Apply stencil and compute delta time: %f\n", (end_time - start_time));
 
     printf("After %lu iterations, delta was %f\n", n, delta);
-    start_time = clock();
+    start_time = seconds();
 
     if (filename != NULL) {
         debugbmp_writebmp(filename, (int)width, (int)height, data);
     }
 
-    end_time = clock();
+    end_time = seconds();
 
-    printf("Outputting the image took %.4f seconds\n", (float)(end_time - start_time)/CLOCKS_PER_SEC);
+    printf("Outputting the image took %f seconds\n", (end_time - start_time));
 
     free(data);
     free(prev);
