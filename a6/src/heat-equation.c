@@ -68,6 +68,7 @@ void run_simulation(size_t width, size_t height, size_t steps, const char* filen
     float delta = 0.0f;
     size_t n = 0;
 
+
     double start_time = seconds();
     for(; n < steps; n++) {
         memcpy(prev, data, size*sizeof(float));
@@ -80,12 +81,17 @@ void run_simulation(size_t width, size_t height, size_t steps, const char* filen
     double par_time = end_time - start_time;
     printf("Parallelized time: %f\n", (par_time));
 
+
     if (filename != NULL) {
         debugbmp_writebmp(filename, (int)width, (int)height, data);
     }
 
+
+
     free(data);
     free(prev);
+
+    //timings and prints seq+overall+delta
     double aft = seconds();
     double seq_time = (aft - bef) - par_time;
     printf("Sequential time: %f\n", seq_time);

@@ -4,12 +4,17 @@ import ctypes
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import time
 
 # Set this to True to use the C-accelerated implementation.
 use_c = True
 
 # Prepare to load C library
 heateqclib = None
+
+# Prepares start and end time values for use in reporting running time
+start_time = None
+end_time = None
 
 def use_clib():
     global heateqclib
@@ -27,6 +32,7 @@ def write_borders(data, width, height):
         heateqclib.write_borders(data.ctypes.data_as(ctypes.c_void_p), width, height)
         return
 
+    
     # Write borders
     for n in range(0, width):
         data[pos(width, n,0)] = 20.0
@@ -42,9 +48,10 @@ def stencil(data, width, x, y, alpha = 0.2):
 
 
 # Runs a single simulated timestep
-def apply_stencil(data, width, height, offset, alpha = 0.2):
+def apply_stencil(data,prev, width, height, offset, alpha = 0.2):
     if heateqclib is not None:
-        heateqclib.apply_stencil(data.ctypes.data_as(ctypes.c_void_p), width, height, offset, ctypes.c_float(alpha))
+        heateqclib.apply_stencil(data.ctypes.data_as(ctypes.c_void_p), prev.ctypes.data_as(ctypes.c_void_p),  width, height, offset, ctypes.c_float(alpha))
+        print("Made it here")
         return
 
     for x in range(1, width-1):
@@ -87,23 +94,30 @@ def run_simulation(width, height, steps):
     delta = 0.0
     n = 0
 
+    start_time = time.time()
     for n in range(0, steps):
         # Copy all items from data into prev
         # prev[:] = data
         np.copyto(prev, data)
-        apply_stencil(data, width, height, n % 2)
+        apply_stencil(data, prev, width, height, n % 2)
         # Compute the elementwise difference, and sum the differences
         delta = compute_delta(data, prev, width, height)
         # Check the delta
         if delta < 0.001:
             break
 
+    end_time = time.time()
+
     # Report the value
     print("After %d iterations, delta was: %f" % (n+1, delta))
 
+    print("Rendering the image took %f seconds" % (end_time - start_time) )
+    start_time = time.time()
     # Make 2D for plotting
     plt.imshow(np.reshape(data, (width, height)), interpolation="none")
     plt.show()
+    end_time = time.time()
+    print("Outputting the image took %f seconds" % (end_time - start_time) )
 
 if __name__ == "__main__":
     if use_c:
