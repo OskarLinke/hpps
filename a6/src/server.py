@@ -11,16 +11,16 @@ import importlib
 heat2d = importlib.import_module("heat2d")
 
 # The size of the simulated grid.
-width, height = (200, 200)
+width, height = (400, 400)
 
 # The number of simulation steps to take per rendered frame.  Increase
 # this to spend more time on compute and less time on graphics.  You
 # should definitely make this 10 or 50 or some similar number once you
 # have a parallel C implementation.
-steps_per_frame = 1
+steps_per_frame = 10
 
 # Set this to True to use the C-accelerated implementation.
-use_c = False
+use_c = True
 
 class Simulation:
     def __init__(self, width=500, height=500):

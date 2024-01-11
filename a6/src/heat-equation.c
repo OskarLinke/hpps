@@ -56,6 +56,7 @@ float compute_delta(float* data, float* prev, size_t width, size_t height) {
 }
 
 void run_simulation(size_t width, size_t height, size_t steps, const char* filename) {
+    double bef = seconds();
     size_t size = width*height;
 
     float* data = malloc(size * sizeof(float));
@@ -76,15 +77,20 @@ void run_simulation(size_t width, size_t height, size_t steps, const char* filen
             break;
     }
     double end_time = seconds();
-    printf("Apply stencil and compute delta time: %f\n", (end_time - start_time));
+    double par_time = end_time - start_time;
+    printf("Parallelized time: %f\n", (par_time));
 
-    printf("After %lu iterations, delta was %f\n", n, delta);
     if (filename != NULL) {
         debugbmp_writebmp(filename, (int)width, (int)height, data);
     }
 
     free(data);
     free(prev);
+    double aft = seconds();
+    double seq_time = (aft - bef) - par_time;
+    printf("Sequential time: %f\n", seq_time);
+    printf("Total time: %f\n", (aft - bef));
+    printf("After %lu iterations, delta was %f\n", n, delta);
 }
 
 int main(int argc, char** argv) {
