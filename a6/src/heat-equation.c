@@ -29,20 +29,22 @@ float stencil(float* data, size_t width, size_t x, size_t y, float alpha) {
     return (alpha * (data[pos(width, x,y)] + data[pos(width, x-1,y)] + data[pos(width, x+1,y)] + data[pos(width, x,y-1)] + data[pos(width, x,y+1)]));
 }
 
-void apply_stencil(float* data, float* prev,size_t width, size_t height, size_t offset, float alpha) {
-        #pragma omp parallel for
-        for (size_t x = 1; x < (width-1); x++) {
-          #pragma omp parallel for
-          for (size_t y = (1 + (x+offset)%2); y < (height-1); y += 2) {
-            data[pos(width, x, y)] = stencil(prev, width, x, y, alpha);
+void apply_stencil(float* data, float* prev, size_t width, size_t height, size_t offset, float alpha) {
+    #pragma omp parallel for collapse(2)
+    for (size_t x = 1; x < (width-1); x++) {
+        for (size_t y = 1; y < (height-1); y++) {
+            if ((x + y + offset) % 2 == 0) {  // Process either even or odd (x + y) based on offset
+                data[pos(width, x, y)] = stencil(prev, width, x, y, alpha);
+            }
         }
-    }    
-  }
+    }
+}
 
 
 float compute_delta(float* data, float* prev, size_t width, size_t height) {
     float res = 0.0; 
 
+    #pragma omp parallel for collapse(2) reduction(+:res)
     for( size_t x= 0; x < width ; x++){ 
         for(size_t y = 0; y < height ; y++){
             res = res + fabs(prev[pos(width, x, y)] - data[pos(width, x, y)]);
@@ -78,7 +80,7 @@ void run_simulation(size_t width, size_t height, size_t steps, const char* filen
             break;
     }
     double end_time = seconds();
-    printf("Rendering time: %f\n", (end_time - start_time));
+    printf("Apply stencil and compute delta time: %f\n", (end_time - start_time));
 
     printf("After %lu iterations, delta was %f\n", n, delta);
     start_time = clock();
