@@ -81,21 +81,18 @@ void run_simulation(size_t width, size_t height, size_t steps, const char* filen
     printf("Rendering the image took %.4f seconds\n", (float)(end_time - start_time)/CLOCKS_PER_SEC);
 
     printf("After %lu iterations, delta was %f\n", n, delta);
-    start_time = clock();
 
     if (filename != NULL) {
         debugbmp_writebmp(filename, (int)width, (int)height, data);
     }
 
-    end_time = clock();
-
-    printf("Outputting the image took %.4f seconds\n", (float)(end_time - start_time)/CLOCKS_PER_SEC);
-
+   
     free(data);
     free(prev);
 }
 
 int main(int argc, char** argv) {
+    time_t start_all = clock();
     if (argc != 4 && argc != 5) {
         fprintf(stderr, "Usage: %s <width> <height> <steps> [output-file]\n", argv[0]);
         return 1;
@@ -121,6 +118,9 @@ int main(int argc, char** argv) {
     }
 
     run_simulation((size_t)width, (size_t)height, (size_t)steps, filename);
+    time_t end_all = clock(); 
+
+    printf("The entire program took %.4f seconds\n", (float)(end_all - start_all)/CLOCKS_PER_SEC);
 
     return 0;
 }
